@@ -1,0 +1,58 @@
+buildscript {
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath 'com.android.tools.build:gradle:4.0.2'
+  }
+}
+
+apply plugin: 'com.android.library'
+
+def safeExtGet(prop, fallback) {
+  rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+android {
+  namespace 'com.reactnativemsal'
+  compileSdkVersion 33
+  defaultConfig {
+    minSdkVersion safeExtGet('Msal_minSdkVersion', 21)
+    targetSdkVersion safeExtGet('Msal_targetSdkVersion', 33)
+    versionCode 1
+    versionName "1.0"
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+  lintOptions {
+    disable 'GradleCompatible'
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+
+repositories {
+  mavenLocal()
+  maven {
+    // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+    url("$rootDir/../node_modules/react-native/android")
+  }
+  google()
+  mavenCentral()
+}
+
+dependencies {
+  // noinspection GradleDynamicVersion
+  implementation 'com.facebook.react:react-native:+' // From node_modules
+  implementation('com.microsoft.identity.client:msal:5.1.0') {
+    exclude group: 'com.microsoft.device.display' // This group is obsolete nowadays
+  }
+}
