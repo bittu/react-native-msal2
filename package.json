@@ -1,6 +1,6 @@
 {
   "name": "react-native-msal2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "description": "MSAL React Native wrapper for iOS and Android",
   "homepage": "https://github.com/bittu/react-native-msal2#readme",
