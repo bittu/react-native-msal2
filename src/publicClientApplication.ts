@@ -24,7 +24,7 @@ type RNMSALNativeModule = {
 
 const RNMSAL: RNMSALNativeModule = NativeModules.RNMSAL
 
-export default RNMSAL
+// export default RNMSAL
 
 export class PublicClientApplication implements IPublicClientApplication {
   private isInitialized: boolean = false

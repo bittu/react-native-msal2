@@ -49,17 +49,9 @@
     "react-native": ">= 0.70"
   },
   "type": "module",
-  "main": "./dist/index.js",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "source": "src/index",
   "prettier": {
     "printWidth": 100,
     "semi": false,
