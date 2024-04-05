@@ -1,6 +1,12 @@
 # react-native-msal2
 
-A plugin for React Native.
+
+[![npm latest version](https://img.shields.io/npm/v/react-native-msal/latest.svg)](https://www.npmjs.com/package/react-native-msal)
+[![npm beta version](https://img.shields.io/npm/v/react-native-msal/beta.svg)](https://www.npmjs.com/package/react-native-msal)
+![ci status](https://github.com/stashenergy/react-native-msal/workflows/CI/badge.svg)
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+
+MSAL React Native wrapper for iOS and Android
 
 ## Installation
 
@@ -10,15 +16,56 @@ npm i react-native-msal2
 
 ## Usage
 
-```jsx
-import React from 'react'
-import { Text } from 'react-native'
-import { Msal2 } from 'react-native-msal2'
+```typescript
+import PublicClientApplication from 'react-native-msal';
+import type { MSALConfiguration /*, etc */ } from 'react-native-msal';
 
-export () =>
-    <Msal2>
-        <Text>Hello Plugin</Text>
-    </Msal2>
+const config: MSALConfiguration = {
+  auth: {
+    clientId: 'your-client-id',
+    // This authority is used as the default in `acquireToken` and `acquireTokenSilent` if not provided to those methods.
+    // Defaults to 'https://login.microsoftonline.com/common'
+    authority: 'https://<authority url>',
+  },
+};
+const scopes = ['scope1', 'scope2'];
+
+// Initialize the public client application:
+const pca = new PublicClientApplication(config);
+try {
+  await pca.init();
+} catch (error) {
+  console.error('Error initializing the pca, check your config.', error);
+}
+
+// Acquiring a token for the first time, you must call pca.acquireToken
+const params: MSALInteractiveParams = { scopes };
+const result: MSALResult | undefined = await pca.acquireToken(params);
+
+// On subsequent token acquisitions, you can call `pca.acquireTokenSilent`
+// Force the token to refresh with the `forceRefresh` option
+const params: MSALSilentParams = {
+  account: result!.account, // or get this by filtering the result from `pca.getAccounts` (see below)
+  scopes,
+  forceRefresh: true,
+};
+const result: MSALResult | undefined = await pca.acquireTokenSilent(params);
+
+// Get all accounts for which this application has refresh tokens
+const accounts: MSALAccount[] = await pca.getAccounts();
+
+// Retrieve the account matching the identifier
+const account: MSALAccount | undefined = await pca.getAccount(result!.account.identifier);
+
+// Remove all tokens from the cache for this application for the provided account
+const success: boolean = await pca.removeAccount(result!.account);
+
+// Same as `pca.removeAccount` with the exception that, if called on iOS with the `signoutFromBrowser` option set to true, it will additionally remove the account from the system browser
+const params: MSALSignoutParams = {
+  account: result!.account,
+  signoutFromBrowser: true,
+};
+const success: boolean = await pca.signOut(params);
 ```
 
 ## Development
