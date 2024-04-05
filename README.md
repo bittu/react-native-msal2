@@ -3,7 +3,6 @@
 
 [![npm latest version](https://img.shields.io/npm/v/react-native-msal2/latest.svg)](https://www.npmjs.com/package/react-native-msal2)
 [![npm beta version](https://img.shields.io/npm/v/react-native-msal2/beta.svg)](https://www.npmjs.com/package/react-native-msal2)
-![ci status](https://github.com/stashenergy/react-native-msal2/workflows/CI/badge.svg)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
 MSAL React Native wrapper for iOS and Android
@@ -17,8 +16,8 @@ npm i react-native-msal2
 ## Usage
 
 ```typescript
-import PublicClientApplication from 'react-native-msal';
-import type { MSALConfiguration /*, etc */ } from 'react-native-msal';
+import PublicClientApplication from 'react-native-msal2';
+import type { MSALConfiguration /*, etc */ } from 'react-native-msal2';
 
 const config: MSALConfiguration = {
   auth: {
