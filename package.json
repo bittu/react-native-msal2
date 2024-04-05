@@ -5,6 +5,10 @@
   "description": "MSAL React Native wrapper for iOS and Android",
   "homepage": "https://github.com/bittu/react-native-msal2#readme",
   "author": "Sandeep Vemula <vsandeep414@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bittu/react-native-msal2.git"
+  },
   "scripts": {
     "app": "node create-app.js",
     "app:install": "npm i --no-save $(npm pack . | tail -1)  --prefix app",
