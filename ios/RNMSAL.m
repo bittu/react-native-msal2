@@ -58,6 +58,9 @@ RCT_REMAP_METHOD(createPublicClientApplication,
             applicationConfig.redirectUri = redirectUri;
         }
 
+        //
+        NSBundle *mainBundle = [NSBundle mainBundle];
+        applicationConfig.cacheConfig.keychainSharingGroup = mainBundle.bundleIdentifier;
         application = [[MSALPublicClientApplication alloc] initWithConfiguration:applicationConfig error:&msalError];
 
         if (msalError) {
