@@ -304,6 +304,18 @@ RCT_REMAP_METHOD(signout,
     [dict setObject:(authority ?: application.configuration.authority.url.absoluteString) forKey:@"authority"];
     [dict setObject:(result.tenantProfile.tenantId ?: [NSNull null]) forKey:@"tenantId"];
     [dict setObject:[self MSALAccountToDictionary:result.account] forKey:@"account"];
+
+    // Unpack payload from JWT to get email user id when accountClaims is null
+    if (!result.account.accountClaims || result.account.accountClaims == nil || result.account.accountClaims == NULL) {
+        NSLog(@"RNMSAL accountClaims is null, decoding it manually from jwt");
+
+        NSString *jwt = result.accessToken;
+        NSDictionary<NSString *, id> *claimsDict = [self decodeJWTPayload:jwt];
+
+        NSMutableDictionary *account = dict[@"account"];
+        account[@"claims"] = claimsDict;
+    }
+
     return [dict mutableCopy];
 }
 
@@ -316,6 +328,53 @@ RCT_REMAP_METHOD(signout,
     [dict setObject:(account.accountClaims ?: [NSNull null]) forKey:@"claims"];
     [dict setObject:account.homeAccountId.tenantId forKey:@"tenantId"];
     return [dict mutableCopy];
+}
+
+/**
+ * Call to decode a Base64 encoded string
+ */
+- (NSString *)decodeBase64StringWithPadding:(NSString *)encodedString {
+    NSString *stringTobeEncoded = [encodedString stringByReplacingOccurrencesOfString:@"-" withString:@"+"];
+    stringTobeEncoded = [stringTobeEncoded stringByReplacingOccurrencesOfString:@"_" withString:@"/"];
+
+    NSInteger paddingCount = encodedString.length % 4;
+    for (NSInteger i = 0; i < paddingCount; i++) {
+        stringTobeEncoded = [stringTobeEncoded stringByAppendingString:@"="];
+    }
+
+    return stringTobeEncoded;
+}
+
+/**
+ * Util function for decoding the payload pat of JWT access token
+ */
+- (NSDictionary<NSString *, id> *)decodeJWTPayload:(NSString *)jwt {
+    NSArray<NSString *> *parts = [jwt componentsSeparatedByString:@"."];
+    if (parts.count != 3) {
+        NSLog(@"%@ %@ called - jwt not valid, parts count: %lu", @(__FILE__), NSStringFromSelector(_cmd), (unsigned long)parts.count);
+        return nil;
+    }
+    NSString *payload = parts[1];
+
+    // decode payload
+    NSString *payloadString = [self decodeBase64StringWithPadding:payload];
+    NSLog(@"%@ %@ called - payloadString %@", @(__FILE__), NSStringFromSelector(_cmd), payloadString);
+
+    // convert JSON string to dictionary
+    NSData *payloadData = [[NSData alloc] initWithBase64EncodedString:payloadString options:0];
+    if (!payloadData) {
+        NSLog(@"%@ %@ called - unable to convert payload to data", @(__FILE__), NSStringFromSelector(_cmd));
+        return nil;
+    }
+
+    NSDictionary<NSString *, id> *result = nil;
+    @try {
+        result = [NSJSONSerialization JSONObjectWithData:payloadData options:0 error:nil];
+    } @catch (NSException *exception) {
+        // handle it
+        NSLog(@"%@ %@ called - error serialising JSON string: %@", @(__FILE__), NSStringFromSelector(_cmd), exception);
+    }
+    return result;
 }
 
 @end
