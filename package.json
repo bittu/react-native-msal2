@@ -1,6 +1,6 @@
 {
   "name": "react-native-msal2",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "license": "MIT",
   "description": "MSAL React Native wrapper for iOS and Android",
   "homepage": "https://github.com/bittu/react-native-msal2#readme",
@@ -19,7 +19,8 @@
     "test": "jest",
     "test:watch": "jest --watchAll",
     "lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
-    "format": "prettier \"{,!(app|dist)/**/}*.{ts,tsx}\" --write"
+    "format": "prettier \"{,!(app|dist)/**/}*.{ts,tsx}\" --write",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@react-native/babel-preset": "^0.74.0",
