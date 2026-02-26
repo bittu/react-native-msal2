@@ -20,6 +20,7 @@ type RNMSALNativeModule = {
   getAccount(accountIdentifier: string): Promise<MSALAccount | undefined>
   removeAccount(account: MSALAccount): Promise<boolean>
   signout(params: MSALSignoutParams): Promise<boolean>
+  getSelectedBrowser(): Promise<string>
 }
 
 const RNMSAL: RNMSALNativeModule = NativeModules.RNMSAL
@@ -69,6 +70,14 @@ export class PublicClientApplication implements IPublicClientApplication {
     return await Platform.select({
       ios: async () => await RNMSAL.signout(params),
       default: async () => await RNMSAL.removeAccount(params.account),
+    })()
+  }
+
+  public async getSelectedBrowser() {
+    this.validateIsInitialized()
+    return await Platform.select({
+      android: async () => await RNMSAL.getSelectedBrowser(),
+      default: async () => 'N/A',
     })()
   }
 

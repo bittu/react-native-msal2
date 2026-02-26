@@ -36,6 +36,7 @@ import java.security.MessageDigest
 import java.util.AbstractMap
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import com.microsoft.identity.common.internal.ui.browser.AndroidBrowserSelector
 
 class RNMSALModule(reactContext: ReactApplicationContext?) :
     ReactContextBaseJavaModule(reactContext) {
@@ -122,6 +123,16 @@ class RNMSALModule(reactContext: ReactApplicationContext?) :
         } catch (e: Exception) {
             promise.reject(e)
         }
+    }
+
+    @ReactMethod
+    fun getSelectedBrowser(promise: Promise) {
+        publicClientApplication?.configuration?.browserSafeList?.let {
+            AndroidBrowserSelector(reactApplicationContext).selectBrowser(it, null)?.let { browser ->
+            promise.resolve("${browser.packageName} ${browser.version} ${if (browser.isCustomTabsServiceSupported) "CustomTab" else "NoCustomTab"}")
+            }
+        }
+        promise.resolve ("Unknown")
     }
 
     @Throws(JSONException::class, IllegalArgumentException::class)

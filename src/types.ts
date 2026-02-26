@@ -48,6 +48,15 @@ export interface IPublicClientApplication {
    * @platform ios
    */
   signOut(params: MSALSignoutParams): Promise<boolean>
+
+  /**
+   * Returns the browser that will be used for interactive authentication.
+   * NOTE: Android only. On iOS this will always return 'N/A'.
+   * @return Promise resolving to the package name and version of the browser that will be used
+   * for interactive authentication.
+   * @platform android
+   */
+  getSelectedBrowser(): Promise<string>
 }
 
 export interface MSALConfiguration {
