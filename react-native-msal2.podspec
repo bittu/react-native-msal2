@@ -16,5 +16,5 @@ Pod::Spec.new do |s|
   s.source_files = "ios/**/*.{h,m}"
 
   s.dependency "React-Core"
-  s.dependency "MSAL", "2.8.2"
+  s.dependency "MSAL", "2.9.0"
 end
