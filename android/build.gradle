@@ -2,33 +2,35 @@ apply plugin: "com.android.library"
 apply plugin: "org.jetbrains.kotlin.android"
 
 def safeExtGet(prop, fallback) {
-  rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
 }
 
 android {
-  namespace "com.reactnativemsal"
+    namespace "com.reactnativemsal"
 
-  compileSdkVersion safeExtGet("compileSdkVersion", 34)
+    compileSdkVersion safeExtGet("compileSdkVersion", 34)
 
-  defaultConfig {
-    minSdkVersion safeExtGet("minSdkVersion", 21)
-    targetSdkVersion safeExtGet("targetSdkVersion", 34)
-  }
+    defaultConfig {
+        minSdkVersion safeExtGet("minSdkVersion", 21)
+        targetSdkVersion safeExtGet("targetSdkVersion", 34)
+    }
 
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 repositories {
-  google()
-  mavenCentral()
+    google()
+    mavenCentral()
 }
 
 dependencies {
-  //noinspection UseTomlInstead
-  compileOnly "com.facebook.react:react-android"
-  //noinspection UseTomlInstead
-  implementation "com.microsoft.identity.client:msal:8.2.1"
+    //noinspection UseTomlInstead
+    implementation "androidx.browser:browser:1.9.0"
+    //noinspection UseTomlInstead
+    compileOnly "com.facebook.react:react-android"
+    //noinspection UseTomlInstead
+    implementation "com.microsoft.identity.client:msal:8.2.3"
 }

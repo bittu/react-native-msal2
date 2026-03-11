@@ -1,9 +1,13 @@
 package com.reactnativemsal
 
+import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.util.Base64
 import android.util.Log
+import androidx.browser.customtabs.CustomTabsService
 import com.facebook.react.bridge.Arguments.createArray
 import com.facebook.react.bridge.Arguments.createMap
 import com.facebook.react.bridge.Arguments.fromArray
@@ -27,6 +31,8 @@ import com.microsoft.identity.client.Prompt
 import com.microsoft.identity.client.PublicClientApplication
 import com.microsoft.identity.client.SilentAuthenticationCallback
 import com.microsoft.identity.client.exception.MsalException
+import com.microsoft.identity.common.internal.broker.PackageHelper
+import com.microsoft.identity.common.internal.ui.browser.AndroidBrowserSelector
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -36,7 +42,6 @@ import java.security.MessageDigest
 import java.util.AbstractMap
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import com.microsoft.identity.common.internal.ui.browser.AndroidBrowserSelector
 
 class RNMSALModule(reactContext: ReactApplicationContext?) :
     ReactContextBaseJavaModule(reactContext) {
@@ -127,12 +132,96 @@ class RNMSALModule(reactContext: ReactApplicationContext?) :
 
     @ReactMethod
     fun getSelectedBrowser(promise: Promise) {
-        publicClientApplication?.configuration?.browserSafeList?.let {
-            AndroidBrowserSelector(reactApplicationContext).selectBrowser(it, null)?.let { browser ->
-            promise.resolve("${browser.packageName} ${browser.version} ${if (browser.isCustomTabsServiceSupported) "CustomTab" else "NoCustomTab"}")
+        val safeList = publicClientApplication?.configuration?.browserSafeList
+
+        val browser = if (!safeList.isNullOrEmpty()) {
+            AndroidBrowserSelector(reactApplicationContext).selectBrowser(safeList, null)
+        } else null
+
+        //if (browser == null) {
+        val result = browser?.let {
+            "${it.packageName} ${it.version} ${it.signatureHashes} (${if (it.isCustomTabsServiceSupported) "CustomTab" else "NoCustomTab"})"
+        } ?: "Unknown"
+
+        promise.resolve(result)
+    }
+
+    @ReactMethod
+    fun getSafeCustomTabsBrowsers(promise: Promise) {
+        try {
+            val safeList = publicClientApplication?.configuration?.browserSafeList
+            if (safeList.isNullOrEmpty()) {
+                promise.resolve(createArray())
+                return
             }
+
+            val pm = reactApplicationContext.packageManager
+
+            val customTabsIntent = Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION)
+
+            val servicePackages = pm.queryIntentServices(customTabsIntent, 0)
+                .mapNotNull { it.serviceInfo?.packageName }
+                .distinct()
+                .sorted()
+
+            val safeEntriesByPackage = safeList.groupBy { it.packageName }
+
+            val result = createArray()
+
+            for (packageName in servicePackages) {
+                val safeEntries = safeEntriesByPackage[packageName].orEmpty()
+                if (safeEntries.isEmpty()) {
+                    continue
+                }
+
+                val packageInfo = getPackageInfoCompat(pm, packageName) ?: continue
+                val version = packageInfo.versionName
+                    ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        packageInfo.longVersionCode.toString()
+                    } else {
+                        @Suppress("DEPRECATION")
+                        packageInfo.versionCode.toString()
+                    }
+                val installedSignatures = PackageHelper.generateSignatureHashes(packageInfo)
+
+                val matchingSignature = installedSignatures.firstOrNull { installed ->
+                    safeEntries.any { safeEntry ->
+                        safeEntry.signatureHashes.any { safeHash ->
+                            safeHash.equals(installed, ignoreCase = false)
+                        }
+                    }
+                } ?: continue
+
+                val signatures = createArray()
+                signatures.pushString(matchingSignature)
+                val item = createMap().apply {
+                    putString("browser_package_name", packageName)
+                    putString("browser_version_lower_bound", version)
+                    putArray("browser_signature_hashes", signatures)
+                }
+                result.pushMap(item)
+            }
+
+            promise.resolve(result)
+        } catch (e: Exception) {
+            promise.reject("GET_SAFE_CUSTOM_TABS_BROWSERS_FAILED", e)
         }
-        promise.resolve ("Unknown")
+    }
+
+    private fun getPackageInfoCompat(pm: PackageManager, packageName: String): PackageInfo? {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.getPackageInfo(
+                    packageName,
+                    PackageManager.PackageInfoFlags.of(PackageManager.GET_SIGNING_CERTIFICATES.toLong())
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+            }
+        } catch (_: Exception) {
+            null
+        }
     }
 
     @Throws(JSONException::class, IllegalArgumentException::class)
@@ -517,6 +606,6 @@ class RNMSALModule(reactContext: ReactApplicationContext?) :
 
         private val aadAuthorityPattern: Pattern =
             Pattern.compile("https://login\\.microsoftonline\\.com/([^/]+)")
-        private val b2cAuthorityPattern: Pattern = Pattern.compile("https://([^/]+)/([^/]+)/.+")
+        private val b2cAuthorityPattern: Pattern = Pattern.compile("https://([^/]+)(/\S*)?")
     }
 }

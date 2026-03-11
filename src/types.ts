@@ -57,6 +57,14 @@ export interface IPublicClientApplication {
    * @platform android
    */
   getSelectedBrowser(): Promise<string>
+
+  /**
+   * Returns a array of installed browsers found in the configured safe list that support customTab.
+   * NOTE: Android only. On iOS this will always return N/A.
+   * @return Promise resolving to an array of installed browsers that support customTab
+   * @platform android
+   */
+  getSafeCustomTabsBrowsers(): Promise<MSALAndroidPreferredBrowser[]>
 }
 
 export interface MSALConfiguration {
@@ -88,9 +96,17 @@ export interface MSALConfiguration {
   androidConfigOptions?: MSALAndroidConfigOptions
 }
 
+export interface MSALAndroidPreferredBrowser {
+  browser_package_name: string;
+  browser_signature_hashes: string[];
+  browser_version_lower_bound?: string;
+  browser_version_upper_bound?: string;
+}
+
 export interface MSALAndroidConfigOptions {
   authorization_user_agent?: 'DEFAULT' | 'BROWSER' | 'WEBVIEW'
   broker_redirect_uri_registered?: boolean
+  preferred_browser?: MSALAndroidPreferredBrowser;
   browser_safelist?: {
     browser_package_name: string
     browser_signature_hashes: string[]
