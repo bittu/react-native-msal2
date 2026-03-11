@@ -84,11 +84,11 @@ export class PublicClientApplication implements IPublicClientApplication {
   }
 
   async getSafeCustomTabsBrowsers() {
-    this.validateIsInitialized();
+    this.validateIsInitialized()
     return await Platform.select({
-      android: async () => await RNMSAL.getSafeCustomTabsBrowsers(),
-      default: async () => null
-    })();
+      android: async () => [await RNMSAL.getSafeCustomTabsBrowsers()],
+      default: async () => [],
+    })()
   }
 
   private validateIsInitialized() {
