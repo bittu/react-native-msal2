@@ -606,6 +606,6 @@ class RNMSALModule(reactContext: ReactApplicationContext?) :
 
         private val aadAuthorityPattern: Pattern =
             Pattern.compile("https://login\\.microsoftonline\\.com/([^/]+)")
-        private val b2cAuthorityPattern: Pattern = Pattern.compile("https://([^/]+)(/\S*)?")
+        private val b2cAuthorityPattern: Pattern = Pattern.compile("""https://([^/]+)(/\S*)?""")
     }
 }
