@@ -22,7 +22,7 @@ type RNMSALNativeModule = {
   removeAccount(account: MSALAccount): Promise<boolean>
   signout(params: MSALSignoutParams): Promise<boolean>
   getSelectedBrowser(): Promise<string>
-  getSafeCustomTabsBrowsers(): Promise<MSALAndroidPreferredBrowser>
+  getSafeCustomTabsBrowsers(): Promise<MSALAndroidPreferredBrowser[]>
 }
 
 const RNMSAL: RNMSALNativeModule = NativeModules.RNMSAL
@@ -86,7 +86,7 @@ export class PublicClientApplication implements IPublicClientApplication {
   async getSafeCustomTabsBrowsers() {
     this.validateIsInitialized()
     return await Platform.select({
-      android: async () => [await RNMSAL.getSafeCustomTabsBrowsers()],
+      android: async () => await RNMSAL.getSafeCustomTabsBrowsers(),
       default: async () => [],
     })()
   }

@@ -97,16 +97,16 @@ export interface MSALConfiguration {
 }
 
 export interface MSALAndroidPreferredBrowser {
-  browser_package_name: string;
-  browser_signature_hashes: string[];
-  browser_version_lower_bound?: string;
-  browser_version_upper_bound?: string;
+  browser_package_name: string
+  browser_signature_hashes: string[]
+  browser_version_lower_bound?: string
+  browser_version_upper_bound?: string
 }
 
 export interface MSALAndroidConfigOptions {
   authorization_user_agent?: 'DEFAULT' | 'BROWSER' | 'WEBVIEW'
   broker_redirect_uri_registered?: boolean
-  preferred_browser?: MSALAndroidPreferredBrowser;
+  preferred_browser?: MSALAndroidPreferredBrowser
   browser_safelist?: {
     browser_package_name: string
     browser_signature_hashes: string[]
