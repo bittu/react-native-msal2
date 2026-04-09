@@ -175,6 +175,16 @@ class RNMSALModule(reactContext: ReactApplicationContext?) :
                 }
 
                 val packageInfo = getPackageInfoCompat(pm, packageName) ?: continue
+
+                // Guard against null signing info which causes NPE in PackageHelper.generateSignatureHashes
+                val hasSigningInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    packageInfo.signingInfo != null
+                } else {
+                    @Suppress("DEPRECATION")
+                    packageInfo.signatures != null
+                }
+                if (!hasSigningInfo) continue
+
                 val version = packageInfo.versionName
                     ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         packageInfo.longVersionCode.toString()
